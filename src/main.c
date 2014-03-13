@@ -40,6 +40,7 @@
 #include "crypt.h"
 #include "rpc.h"
 #include "bitc_ui.h"
+#include "serial.h"
 
 
 #define LGPFX "BITC:"
@@ -358,22 +359,22 @@ bitc_sigint_handler(int sig)
  *---------------------------------------------------------------------
  */
 
-static pthread_mutex_t *ssl_mutex_array;
+//static pthread_mutex_t *ssl_mutex_array;
 
-static void
-bitc_openssl_lock_fun(int mode,
-                      int n,
-                      const char *file,
-                      int line)
-{
-   pthread_mutex_t *lock = &ssl_mutex_array[n];
-
-   if (mode & CRYPTO_LOCK) {
-      pthread_mutex_lock(lock);
-   } else {
-      pthread_mutex_unlock(lock);
-   }
-}
+//static void
+//bitc_openssl_lock_fun(int mode,
+//                      int n,
+//                      const char *file,
+//                      int line)
+//{
+//   pthread_mutex_t *lock = &ssl_mutex_array[n];
+//
+//   if (mode & CRYPTO_LOCK) {
+//      pthread_mutex_lock(lock);
+//   } else {
+//      pthread_mutex_unlock(lock);
+//   }
+//}
 
 
 /*
@@ -384,11 +385,11 @@ bitc_openssl_lock_fun(int mode,
  *---------------------------------------------------------------------
  */
 
-static unsigned long
-bitc_openssl_thread_id_fun(void)
-{
-   return (unsigned long)pthread_self();
-}
+//static unsigned long
+//bitc_openssl_thread_id_fun(void)
+//{
+//   return (unsigned long)pthread_self();
+//}
 
 
 /*
@@ -399,25 +400,25 @@ bitc_openssl_thread_id_fun(void)
  *---------------------------------------------------------------------
  */
 
-static void
-bitc_openssl_init(void)
-{
-   const char *sslVersion = SSLeay_version(SSLEAY_VERSION);
-   int i;
-
-   Log(LGPFX" using %s -- %u locks\n", sslVersion, CRYPTO_num_locks());
-
-   SSL_library_init();
-   ssl_mutex_array = OPENSSL_malloc(CRYPTO_num_locks() *
-                                    sizeof *ssl_mutex_array);
-   ASSERT(ssl_mutex_array);
-
-   for (i = 0; i < CRYPTO_num_locks(); i++ ){
-      pthread_mutex_init(&ssl_mutex_array[i], NULL);
-   }
-   CRYPTO_set_id_callback(bitc_openssl_thread_id_fun);
-   CRYPTO_set_locking_callback(bitc_openssl_lock_fun);
-}
+//static void
+//bitc_openssl_init(void)
+//{
+//   const char *sslVersion = SSLeay_version(SSLEAY_VERSION);
+//   int i;
+//
+//   Log(LGPFX" using %s -- %u locks\n", sslVersion, CRYPTO_num_locks());
+//
+//   SSL_library_init();
+//   ssl_mutex_array = OPENSSL_malloc(CRYPTO_num_locks() *
+//                                    sizeof *ssl_mutex_array);
+//   ASSERT(ssl_mutex_array);
+//
+//   for (i = 0; i < CRYPTO_num_locks(); i++ ){
+//      pthread_mutex_init(&ssl_mutex_array[i], NULL);
+//   }
+//   CRYPTO_set_id_callback(bitc_openssl_thread_id_fun);
+//   CRYPTO_set_locking_callback(bitc_openssl_lock_fun);
+//}
 
 
 /*
@@ -428,18 +429,18 @@ bitc_openssl_init(void)
  *------------------------------------------------------------------------
  */
 
-static void
-bitc_openssl_exit(void)
-{
-   int i;
-
-   CRYPTO_set_id_callback(NULL);
-   CRYPTO_set_locking_callback(NULL);
-   for (i = 0; i < CRYPTO_num_locks(); i++) {
-      pthread_mutex_destroy(&ssl_mutex_array[i]);
-   }
-   OPENSSL_free(ssl_mutex_array);
-}
+//static void
+//bitc_openssl_exit(void)
+//{
+//   int i;
+//
+//   CRYPTO_set_id_callback(NULL);
+//   CRYPTO_set_locking_callback(NULL);
+//   for (i = 0; i < CRYPTO_num_locks(); i++) {
+//      pthread_mutex_destroy(&ssl_mutex_array[i]);
+//   }
+//   OPENSSL_free(ssl_mutex_array);
+//}
 
 
 /*
@@ -737,11 +738,11 @@ bitc_poll_exit(void)
  *----------------------------------------------------------------
  */
 
-static void
-bitc_poll_init(void)
-{
-   btc->poll = poll_create();
-}
+//static void
+//bitc_poll_init(void)
+//{
+//   btc->poll = poll_create();
+//}
 
 
 /*
@@ -990,38 +991,38 @@ bitc_req_exit(void)
  *----------------------------------------------------------------
  */
 
-static int
-bitc_req_init(void)
-{
-   int fd[2];
-   int flags;
-   int res;
-
-   res = pipe(fd);
-   if (res != 0) {
-      res = errno;
-      Log(LGPFX" Failed to create pipe: %s\n", strerror(res));
-      return res;
-   }
-   btc->eventFd  = fd[0];
-   btc->notifyFd = fd[1];
-
-   flags = fcntl(btc->eventFd, F_GETFL, 0);
-   if (flags < 0) {
-      NOT_TESTED();
-      return flags;
-   }
-
-   res = fcntl(btc->eventFd, F_SETFL, flags | O_NONBLOCK);
-   if (res < 0) {
-      NOT_TESTED();
-      return res;
-   }
-   poll_callback_device(btc->poll, btc->eventFd, 1, 0, 1, bitc_req_cb, NULL);
-   btc->notifyInit = 1;
-
-   return 0;
-}
+//static int
+//bitc_req_init(void)
+//{
+//   int fd[2];
+//   int flags;
+//   int res;
+//
+//   res = pipe(fd);
+//   if (res != 0) {
+//      res = errno;
+//      Log(LGPFX" Failed to create pipe: %s\n", strerror(res));
+//      return res;
+//   }
+//   btc->eventFd  = fd[0];
+//   btc->notifyFd = fd[1];
+//
+//   flags = fcntl(btc->eventFd, F_GETFL, 0);
+//   if (flags < 0) {
+//      NOT_TESTED();
+//      return flags;
+//   }
+//
+//   res = fcntl(btc->eventFd, F_SETFL, flags | O_NONBLOCK);
+//   if (res < 0) {
+//      NOT_TESTED();
+//      return res;
+//   }
+//   poll_callback_device(btc->poll, btc->eventFd, 1, 0, 1, bitc_req_cb, NULL);
+//   btc->notifyInit = 1;
+//
+//   return 0;
+//}
 
 
 /*
@@ -1035,8 +1036,8 @@ bitc_req_init(void)
 static int
 bitc_init(struct secure_area *passphrase,
           bool                updateAndExit,
-          int                 maxPeers,
-          int                 minPeersInit,
+//          int                 maxPeers,
+//          int                 minPeersInit,
           char              **errStr)
 {
    int res;
@@ -1050,22 +1051,23 @@ bitc_init(struct secure_area *passphrase,
    bitcui_set_status("starting..");
 #endif
    util_bumpnofds();
-   bitc_poll_init();
-   bitc_req_init();
-   netasync_init(btc->poll);
+//   bitc_poll_init();
+//   bitc_req_init();
+//   netasync_init(btc->poll);
 
-   if (config_getbool(btc->config, FALSE, "network.useSocks5")) {
-      btc->socks5_proxy = config_getstring(btc->config, "localhost", "socks5.hostname");
-      btc->socks5_port  = config_getint64(btc->config,
-#ifdef linux
-                                          9050,
-#else
-                                          9150,
-#endif
-                                          "socks5.port");
-      Log(LGPFX" Using SOCKS5 proxy %s:%u.\n",
-          btc->socks5_proxy, btc->socks5_port);
-   }
+//   if (config_getbool(btc->config, FALSE, "network.useSocks5")) {
+//      btc->socks5_proxy = config_getstring(btc->config, "localhost", "socks5.hostname");
+//      btc->socks5_port  = config_getint64(btc->config,
+//#ifdef linux
+//                                          9050,
+//#else
+//                                          9150,
+//#endif
+//                                          "socks5.port");
+//      Log(LGPFX" Using SOCKS5 proxy %s:%u.\n",
+//          btc->socks5_proxy, btc->socks5_port);
+//   }
+
 #ifdef WITHUI
    bitcui_set_status("loading addrbook..");
 #else
@@ -1084,7 +1086,7 @@ bitc_init(struct secure_area *passphrase,
       return res;
    }
 
-   peergroup_init(btc->config, maxPeers, minPeersInit, 15 * 1000 * 1000); // 15 sec
+//   peergroup_init(btc->config, maxPeers, minPeersInit, 15 * 1000 * 1000); // 15 sec
 
 #ifdef WITHUI
    bitcui_set_status("loading wallet..");
@@ -1096,14 +1098,23 @@ bitc_init(struct secure_area *passphrase,
       return res;
    }
 
-#ifdef WITHUI
-   bitcui_set_status("adding peers..");
-#else
-   printf("adding peers..\n");
-#endif
-   peergroup_seed();
+   printf("initializing serial connection..\n");
+   res = serial_init();
+   res = wallet_open(btc->config, passphrase, errStr, &btc->wallet);
+   if (res != 0) {
+	   *errStr = "Failed to initialize serial connection.";
+	   return res;
+   }
 
-   return rpc_init();
+//#ifdef WITHUI
+//   bitcui_set_status("adding peers..");
+//#else
+//   printf("adding peers..\n");
+//#endif
+//   peergroup_seed();
+
+//   return rpc_init();
+   return 0;
 }
 
 
@@ -1148,17 +1159,17 @@ bitc_exit(void)
  */
 
 static void
-bitc_daemon(bool updateAndExit,
-            int maxPeers)
+bitc_daemon(bool updateAndExit)
 {
    Warning(LGPFX" daemon running.\n");
 #ifdef WITHUI
    bitcui_set_status("connecting to peers..");
 #endif
-   peergroup_refill(TRUE /* init */);
+//   peergroup_refill(TRUE /* init */);
 
    while (btc->stop == 0) {
-      poll_runloop(btc->poll, &btc->stop);
+//      poll_runloop(btc->poll, &btc->stop);
+	   //TODO: Comm loop here
    }
    Warning(LGPFX" daemon stopped.\n");
 }
@@ -1175,12 +1186,12 @@ bitc_daemon(bool updateAndExit,
 int main(int argc, char *argv[])
 {
    struct secure_area *passphrase = NULL;
-   const int minPeersInit = 50;
+//   const int minPeersInit = 50;
    char *addr_label = NULL;
    char *errStr = NULL;
    char *configPath = NULL;
    char *testStr = NULL;
-   int maxPeers = 5;
+//   int maxPeers = 5;
    bool updateAndExit = 0;
    bool zap = 0;
    bool withui = 1;
@@ -1195,7 +1206,7 @@ int main(int argc, char *argv[])
       { "daemon",       no_argument,        0,  'd' },
       { "encrypt",      no_argument,        0,  'e' },
       { "help",         no_argument,        0,  'h' },
-      { "numPeers",     required_argument,  0,  'n' },
+//      { "numPeers",     required_argument,  0,  'n' },
       { "passphrase",   required_argument,  0,  'p' },
       { "test",         required_argument,  0,  't' },
       { "testnet",      no_argument,        0,  'T' },
@@ -1214,7 +1225,7 @@ int main(int argc, char *argv[])
       case 'c': configPath = optarg;     break;
       case 'd': withui = 0;              break;
       case 'e': encrypt = 1;             break;
-      case 'n': maxPeers = atoi(optarg); break;
+//      case 'n': maxPeers = atoi(optarg); break;
       case 'p': getpassword = 1;         break;
       case 't': testStr = optarg;        break;
       case 'T': btc->testnet = 1;        break;
@@ -1244,6 +1255,7 @@ int main(int argc, char *argv[])
       free(logFile);
       free(login);
    }
+
    util_bumpcoresize();
    bitc_check_config();
 
@@ -1251,6 +1263,7 @@ int main(int argc, char *argv[])
    if (res != 0) {
       return res;
    }
+
    bitc_load_misc_config();
    if (bitc_check_wallet()) {
       return 0;
@@ -1346,23 +1359,25 @@ int main(int argc, char *argv[])
    }
 
    btc->lock = mutex_alloc();
-   btc->pw = poolworker_create(10);
-   ipinfo_init();
-   bitc_openssl_init();
+//   btc->pw = poolworker_create(10);
+//   ipinfo_init();
+//   bitc_openssl_init();
+//   curl_global_init(CURL_GLOBAL_DEFAULT);
 #ifdef WITHUI
-   curl_global_init(CURL_GLOBAL_DEFAULT);
    res = bitcui_start(withui);
    if (res) {
       goto exit;
    }
 #endif
 
-   res = bitc_init(passphrase, updateAndExit, maxPeers, minPeersInit, &errStr);
+//   res = bitc_init(passphrase, updateAndExit, maxPeers, minPeersInit, &errStr);
+   res = bitc_init(passphrase, updateAndExit, &errStr);
    if (res) {
       goto exit;
    }
 
-   bitc_daemon(updateAndExit, maxPeers);
+//   bitc_daemon(updateAndExit, maxPeers);
+   bitc_daemon(updateAndExit);
 
 exit:
    bitc_process_events();
@@ -1370,11 +1385,11 @@ exit:
 #ifdef WITHUI
    bitcui_stop();
 #endif
-   poolworker_wait(btc->pw);
-   ipinfo_exit();
-   poolworker_destroy(btc->pw);
-   curl_global_cleanup();
-   bitc_openssl_exit();
+//   poolworker_wait(btc->pw);
+//   ipinfo_exit();
+//   poolworker_destroy(btc->pw);
+//   curl_global_cleanup();
+//   bitc_openssl_exit();
    mutex_free(btc->lock);
    secure_free(passphrase);
    if (errStr) {

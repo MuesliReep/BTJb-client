@@ -14,7 +14,7 @@ ASAN = 0
 ###
 
 CFLAGS  = -O1 -MMD -g
-CFLAGS += -Wall -Werror
+CFLAGS += -Wall #-Werror
 ifneq ($(ARCH), armv6l)
 CFLAGS += -Wshadow -Wextra
 endif
@@ -105,6 +105,7 @@ BTC_FILES += cJSON.c
 BTC_FILES += ip_info.c
 BTC_FILES += crypt.c
 BTC_FILES += rpc.c
+BTC_FILES += serial.c
 
 BTC_SRC  := $(patsubst %,$(SRCDIR)/%,$(BTC_FILES))
 BTC_SRC  := $(sort $(BTC_SRC))
