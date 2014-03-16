@@ -1099,7 +1099,7 @@ bitc_init(struct secure_area *passphrase,
    }
 
    printf("initializing serial connection..\n");
-   res = serial_init();
+   res = serial_init("/dev/pts/1");
    if (res != 0) {
 	   *errStr = "Failed to initialize serial connection.";
 	   return res;
@@ -1141,7 +1141,6 @@ bitc_exit(void)
    bitc_req_exit();
    netasync_exit();
    bitc_poll_exit();
-   serial_exit();
 
    config_free(btc->txLabelsCfg);
    config_free(btc->contactsCfg);
@@ -1167,11 +1166,15 @@ bitc_daemon(bool updateAndExit)
 //#endif
 //   peergroup_refill(TRUE /* init */);
 
-   serial_send_test();
+   unsigned char c='D';
 
    while (btc->stop == 0) {
 //      poll_runloop(btc->poll, &btc->stop);
-	   //TODO: Comm loop here
+
+	   if (read(STDIN_FILENO,&c,1)>0){
+		   if(c=='q')
+			   btc->stop = 1;
+	   }
    }
    Warning(LGPFX" daemon stopped.\n");
 }
@@ -1382,8 +1385,9 @@ int main(int argc, char *argv[])
    bitc_daemon(updateAndExit);
 
 exit:
-   bitc_process_events();
-   bitc_exit();
+	serial_exit();
+	bitc_process_events();
+	bitc_exit();
 #ifdef WITHUI
    bitcui_stop();
 #endif
