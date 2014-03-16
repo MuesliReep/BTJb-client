@@ -1100,7 +1100,6 @@ bitc_init(struct secure_area *passphrase,
 
    printf("initializing serial connection..\n");
    res = serial_init();
-   res = wallet_open(btc->config, passphrase, errStr, &btc->wallet);
    if (res != 0) {
 	   *errStr = "Failed to initialize serial connection.";
 	   return res;
@@ -1142,6 +1141,7 @@ bitc_exit(void)
    bitc_req_exit();
    netasync_exit();
    bitc_poll_exit();
+   serial_exit();
 
    config_free(btc->txLabelsCfg);
    config_free(btc->contactsCfg);
@@ -1162,10 +1162,12 @@ static void
 bitc_daemon(bool updateAndExit)
 {
    Warning(LGPFX" daemon running.\n");
-#ifdef WITHUI
-   bitcui_set_status("connecting to peers..");
-#endif
+//#ifdef WITHUI
+//   bitcui_set_status("connecting to peers..");
+//#endif
 //   peergroup_refill(TRUE /* init */);
+
+   serial_send_test();
 
    while (btc->stop == 0) {
 //      poll_runloop(btc->poll, &btc->stop);
