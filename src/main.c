@@ -1148,6 +1148,19 @@ bitc_exit(void)
    free(btc->socks5_proxy);
 }
 
+/*
+ *---------------------------------------------------------------------
+ *
+ * bitc_process_serials --
+ *
+ *---------------------------------------------------------------------
+ */
+
+static void
+bitc_process_serial(unsigned char *c){
+
+}
+
 
 /*
  *---------------------------------------------------------------------
@@ -1170,6 +1183,10 @@ bitc_daemon(bool updateAndExit)
 
    while (btc->stop == 0) {
 //      poll_runloop(btc->poll, &btc->stop);
+
+	   //Check for serial activity & process it
+	   if(serial_read(&c)>0)
+		   bitc_process_serial(&c);
 
 	   //Check if user requested to quit
 	   if (read(STDIN_FILENO,&c,1)>0){
