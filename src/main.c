@@ -725,7 +725,7 @@ bitc_load_config(struct config **config,
 static void
 bitc_poll_exit(void)
 {
-   poll_destroy(btc->poll);
+   //poll_destroy(btc->poll);
    btc->poll = NULL;
 }
 
@@ -1171,6 +1171,7 @@ bitc_daemon(bool updateAndExit)
    while (btc->stop == 0) {
 //      poll_runloop(btc->poll, &btc->stop);
 
+	   //Check if user requested to quit
 	   if (read(STDIN_FILENO,&c,1)>0){
 		   if(c=='q')
 			   btc->stop = 1;

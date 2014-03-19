@@ -19,6 +19,7 @@ int serial_init(const char *file) {
 	tcgetattr(STDOUT_FILENO,&old_stdio);
 
 	printf("Opening device %s\n",file);
+	Log(LGPFX" Opening serial device %s.\n",file);
 	memset(&stdio,0,sizeof(stdio));
 	stdio.c_iflag=0;
 	stdio.c_oflag=0;
